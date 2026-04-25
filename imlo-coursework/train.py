@@ -2,8 +2,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
+import torch.nn.functional as F
 from torchvision.datasets import OxfordIIITPet
 import torchvision.transforms as transforms
+import sklearn.datasets
 
 # -- Primary Model & Main Function --
 def main(data_dir: str,
@@ -24,22 +26,44 @@ def main(data_dir: str,
         num_workers (int): number of threads (may not be implemented.)
         save_path (str): path to save the training data.
     """
-    print("## SUPERVISED LEARNING ##\n Breed Classifier\n")
 
     pass
 
 class CNN(nn.Module):
 
-    def __init__(self, num_classes: int = 37):
+    def __init__(self,
+                 input_features: list,
+                 hidden_layers: list,
+                 output_features: list,
+                 activation_function: F.relu):
         super().__init__()
-        pass
+        if len(hidden_layers) < 1:
+            raise ValueError()
+        
+        self.layers = []
+        self.layers.append(nn.Linear(input_features, hidden_layers[0]))
+        self.add_module("Input Layer", self.layers[0])
+
+        for i in range(len(hidden_layers)):
+            self.layers.append(nn.Linear(hidden_layers[i-1], hidden_layers[i]))
+            self.add_module([f"Hidden Layer {i}"], self.layers[i])
+        
+        self.out = nn.Linear(hidden_layers[-1], output_features)
+        self.add_module("Output Layer", self.out)
+
+        self.activation_function = activation_function
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        pass
+        for i in range(len(self.layers)):
+            x = self.activation_function(self.layers[i](x))
+        x = self.out
+        return x
 
 # -- Data Loading and Transforms --
 def load_dataset(data_dir: str, 
                  split: str = 'trainval') -> Dataset:
+    oxfordIIIpet = Dataset()
+    oxfordIIIpet.__getitem__('')
     pass
 
 def create_transforms(image_size: int) -> tuple[transforms.Compose, transforms.Compose]:
@@ -73,4 +97,4 @@ def validate():
 
 
 if __name__ == '__main__':
-    main()
+    pass
